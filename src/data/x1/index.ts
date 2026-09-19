@@ -14,3 +14,4 @@ export * from "./weapons";
 export * from "./stages";
 export * from "./characters";
 export * from "./blueprints";
+export * from "./intel";

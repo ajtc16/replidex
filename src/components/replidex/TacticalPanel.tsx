@@ -10,6 +10,7 @@ interface TacticalPanelProps {
   bodyClassName?: string;
   scanlines?: boolean;
   brackets?: boolean;
+  id?: string;
 }
 
 /**
@@ -24,9 +25,11 @@ export function TacticalPanel({
   bodyClassName,
   scanlines,
   brackets,
+  id,
 }: TacticalPanelProps) {
   return (
     <section
+      id={id}
       className={cn(
         "relative border bg-[var(--surface)]",
         brackets && "hud-brackets",
