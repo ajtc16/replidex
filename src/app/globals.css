@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+/*
+  REPLIDEX — Maverick Hunter Tactical Database
+  Design tokens. "Sci-fi outside, modern app inside."
+  All colors/spacing referenced through semantic variables below.
+*/
+
+:root {
+  /* --- Surfaces (near-black, gunmetal, military green) --- */
+  --background: #070a0c;
+  --surface: #0d1317;
+  --surface-elevated: #131c22;
+  --surface-inset: #090e11;
+
+  /* --- Borders --- */
+  --border: #1f2d33;
+  --border-strong: #2c4048;
+  --border-active: #d98b2b;
+
+  /* --- Accents --- */
+  --tactical-amber: #f0a742;
+  --tactical-amber-dim: #a9741f;
+  --tactical-cyan: #3fd0e0;
+  --tactical-cyan-dim: #2a8b96;
+  --tactical-green: #4ade80;
+
+  /* --- Semantic status --- */
+  --danger: #e8564a;
+  --warning: #f0a742;
+  --success: #4ade80;
+  --info: #3fd0e0;
+
+  /* --- Text --- */
+  --text-primary: #eaf2f4;
+  --text-secondary: #9db2ba;
+  --text-muted: #5c7078;
+
+  /* --- Elemental colors --- */
+  --el-ice: #6fc7e8;
+  --el-fire: #f0714a;
+  --el-electric: #f0d24a;
+  --el-water: #4a92f0;
+  --el-air: #b8c7cf;
+  --el-ground: #c08a4a;
+  --el-genesis: #b06ae0;
+  --el-none: #7a8c93;
+
+  /* --- Radii --- */
+  --radius: 0.375rem;
+
+  --font-sans: var(--font-body);
+  --font-condensed: var(--font-heading);
+  --font-mono: var(--font-mono-tech);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-inset: var(--surface-inset);
+
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-active: var(--border-active);
+
+  --color-amber: var(--tactical-amber);
+  --color-amber-dim: var(--tactical-amber-dim);
+  --color-cyan: var(--tactical-cyan);
+  --color-cyan-dim: var(--tactical-cyan-dim);
+  --color-tgreen: var(--tactical-green);
+
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-heading: var(--font-condensed), system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* Subtle tactical grid + vignette on the base canvas */
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(240, 167, 66, 0.05), transparent 55%),
+    linear-gradient(rgba(63, 208, 224, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(63, 208, 224, 0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 44px 44px, 44px 44px;
+  background-attachment: fixed;
+}
+
+/* --- Reusable tactical utilities --- */
+
+/* Condensed uppercase tactical label */
+.tac-label {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+/* Clipped-corner tactical frame */
+.clip-corner {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+/* HUD bracket corners */
+.hud-brackets {
+  position: relative;
+}
+.hud-brackets::before,
+.hud-brackets::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--border-active);
+  pointer-events: none;
+}
+.hud-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+.hud-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+/* Scanline overlay */
+.scanlines {
+  position: relative;
+}
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(63, 208, 224, 0.035) 0px,
+    rgba(63, 208, 224, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.glow-amber {
+  box-shadow: 0 0 0 1px rgba(240, 167, 66, 0.25), 0 0 24px -6px rgba(240, 167, 66, 0.4);
+}
+
+/* Status light pulse */
+@keyframes tac-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+.status-pulse {
+  animation: tac-pulse 2s ease-in-out infinite;
+}
+
+/* Scanner sweep */
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(400%);
+  }
+}
+.scan-sweep {
+  animation: scan-sweep 4s linear infinite;
+}
+
+/* Slow spin for radar/globe */
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.slow-spin {
+  animation: slow-spin 40s linear infinite;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-inset);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tactical-amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
