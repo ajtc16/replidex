@@ -105,11 +105,19 @@ export function buildRoute(
     "flame-mammoth",
   ];
 
-  // Beginner route front-loads low-threat targets but keeps the exploit chain.
-  const order = mode === "weakness" ? weaknessOrder : weaknessOrder;
+  // Beginner route front-loads the lowest-threat targets (fought with the
+  // buster) rather than juggling weapons; ties break toward the weakness loop.
+  const loopIndex = (id: string) => weaknessOrder.indexOf(id);
+  const beginnerOrder = [...weaknessOrder].sort((a, b) => {
+    const ta = mavericks.find((m) => m.id === a)?.threatLevel ?? 3;
+    const tb = mavericks.find((m) => m.id === b)?.threatLevel ?? 3;
+    return ta - tb || loopIndex(a) - loopIndex(b);
+  });
+
+  const order = mode === "weakness" ? weaknessOrder : beginnerOrder;
 
   const owned = ownedWeaponIds(progress, mavericks);
-  let cursorReached = false;
+  let frontAssigned = false; // the first undefeated node is the current "front"
 
   return order
     .map((id) => mavericks.find((m) => m.id === id))
@@ -123,22 +131,31 @@ export function buildRoute(
       let status: TargetStatus;
       if (defeated) {
         status = "complete";
-      } else if (haveWeakness || !cursorReached) {
+      } else if (mode === "beginner") {
+        // Beginner mode leans on the buster: nothing is gated behind weapons.
         status = "available";
-        cursorReached = true;
+      } else if (haveWeakness || !frontAssigned) {
+        // Weakness mode: exploitable now, or this is the current front.
+        status = "available";
+        frontAssigned = true;
       } else {
-        status = "available"; // all X1 stages are technically open
+        status = "locked";
       }
 
       let reason: string;
       if (defeated) {
-        reason = `Neutralized. ${weaponReward ? `${weaponReward.name} acquired.` : ""}`.trim();
+        reason = `Neutralized.${weaponReward ? ` ${weaponReward.name} acquired.` : ""}`;
       } else if (haveWeakness && weaknessWeapon) {
         reason = `You possess ${weaknessWeapon.name} — exploit the weakness for a fast clear.`;
       } else if (index === 0) {
-        reason = "Recommended opener. No weapon dependency required.";
+        reason =
+          mode === "beginner"
+            ? "Lowest-threat opener. Clear it with the standard X-Buster."
+            : "Recommended opener. Drops the weapon that starts the exploit chain.";
+      } else if (mode === "beginner") {
+        reason = "Manageable buster fight — no weapon dependency required.";
       } else if (weaknessWeapon) {
-        reason = `Clear the previous target first to obtain ${weaknessWeapon.name}.`;
+        reason = `Locked — defeat the previous target to obtain ${weaknessWeapon.name}.`;
       } else {
         reason = "Accessible for deployment.";
       }
