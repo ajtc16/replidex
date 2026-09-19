@@ -10,11 +10,13 @@ import { StatusBadge } from "@/components/replidex/StatusBadge";
 import {
   x1Briefings,
   x1Transmissions,
-  x1MavericksById,
-  x1Mavericks,
-  x1WeaponsById,
-  x1Stages,
 } from "@/data/x1";
+import {
+  allMavericks,
+  allMavericksById,
+  allWeaponsById,
+  allStages,
+} from "@/data/registry";
 import { generateLogs } from "@/services/logs";
 import { useProgressStore } from "@/stores/progress.store";
 import { cn } from "@/lib/cn";
@@ -39,7 +41,7 @@ export default function IntelPage() {
   const hydrated = useProgressStore((s) => s.hydrated);
 
   const logs = useMemo(
-    () => generateLogs(progress, x1MavericksById, x1WeaponsById, x1Stages),
+    () => generateLogs(progress, allMavericksById, allWeaponsById, allStages),
     [progress],
   );
 
@@ -99,9 +101,9 @@ export default function IntelPage() {
                     )}
                     <p className="text-[0.76rem] leading-relaxed text-[var(--text-secondary)]">{b.body}</p>
                   </div>
-                  {b.relatedMaverickId && x1MavericksById[b.relatedMaverickId] && (
+                  {b.relatedMaverickId && allMavericksById[b.relatedMaverickId] && (
                     <a
-                      href={`/targets/${x1MavericksById[b.relatedMaverickId].slug}`}
+                      href={`/targets/${allMavericksById[b.relatedMaverickId].slug}`}
                       className="tac-label mt-3 inline-block text-[0.55rem] text-[var(--tactical-amber)] hover:underline"
                     >
                       Open Target Dossier →
@@ -120,7 +122,7 @@ export default function IntelPage() {
                   transmission={tx}
                   maverickSlug={
                     tx.relatedMaverickId
-                      ? x1MavericksById[tx.relatedMaverickId]?.slug
+                      ? allMavericksById[tx.relatedMaverickId]?.slug
                       : undefined
                   }
                 />
@@ -140,7 +142,7 @@ export default function IntelPage() {
         </div>
 
         <p className="mt-4 text-center text-[0.55rem] text-[var(--text-muted)]">
-          Tactical logs are generated live from your campaign progress · {x1Mavericks.length} targets tracked
+          Tactical logs are generated live from your campaign progress · {allMavericks.length} targets tracked
         </p>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { PlayerProgress } from "@/domain/types";
-import { x1MavericksById } from "@/data/x1";
+import { allMavericksById } from "@/data/registry";
 
 interface ProgressState extends PlayerProgress {
   hydrated: boolean;
@@ -39,7 +39,7 @@ export const useProgressStore = create<ProgressState>()(
 
       defeatMaverick: (id) =>
         set((s) => {
-          const reward = x1MavericksById[id]?.weaponRewardId;
+          const reward = allMavericksById[id]?.weaponRewardId;
           return {
             defeatedMavericks: addUnique(s.defeatedMavericks, id),
             acquiredWeapons: reward
@@ -49,7 +49,7 @@ export const useProgressStore = create<ProgressState>()(
         }),
       restoreMaverick: (id) =>
         set((s) => {
-          const reward = x1MavericksById[id]?.weaponRewardId;
+          const reward = allMavericksById[id]?.weaponRewardId;
           return {
             defeatedMavericks: remove(s.defeatedMavericks, id),
             acquiredWeapons: reward
@@ -60,7 +60,7 @@ export const useProgressStore = create<ProgressState>()(
       toggleMaverick: (id) =>
         set((s) => {
           const isDefeated = s.defeatedMavericks.includes(id);
-          const reward = x1MavericksById[id]?.weaponRewardId;
+          const reward = allMavericksById[id]?.weaponRewardId;
           if (isDefeated) {
             return {
               defeatedMavericks: remove(s.defeatedMavericks, id),

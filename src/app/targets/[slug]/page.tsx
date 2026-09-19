@@ -13,11 +13,11 @@ import { WeaponChip } from "@/components/replidex/WeaponChip";
 import { WeaknessChain } from "@/components/replidex/WeaknessChain";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
 import {
-  x1MavericksById,
-  x1Mavericks,
-  x1WeaponsById,
-  x1StagesByMaverickId,
-} from "@/data/x1";
+  allMavericksById,
+  allWeaponsById,
+  allStagesByMaverickId,
+  getGameData,
+} from "@/data/registry";
 import { getWeaknessChainFor } from "@/services/weaknessGraph";
 import { useProgressStore } from "@/stores/progress.store";
 import { cn } from "@/lib/cn";
@@ -31,26 +31,27 @@ const COLLECTIBLE_TONE: Record<string, string> = {
 
 export default function DossierPage() {
   const params = useParams<{ slug: string }>();
-  const maverick = x1MavericksById[params.slug];
+  const maverick = allMavericksById[params.slug];
 
   const defeated = useProgressStore((s) => s.defeatedMavericks);
   const collected = useProgressStore((s) => s.collectedItems);
   const toggleMaverick = useProgressStore((s) => s.toggleMaverick);
   const toggleItem = useProgressStore((s) => s.toggleItem);
 
-  const chain = useMemo(
-    () => (maverick ? getWeaknessChainFor(maverick, x1Mavericks, x1WeaponsById) : null),
-    [maverick],
-  );
+  const chain = useMemo(() => {
+    if (!maverick) return null;
+    const gameData = getGameData(maverick.series);
+    return getWeaknessChainFor(maverick, gameData.mavericks, gameData.weaponsById);
+  }, [maverick]);
 
   if (!maverick) return notFound();
 
   const isDefeated = defeated.includes(maverick.id);
-  const weakness = x1WeaponsById[maverick.weaknessWeaponId];
-  const reward = x1WeaponsById[maverick.weaponRewardId];
-  const stage = x1StagesByMaverickId[maverick.id];
+  const weakness = allWeaponsById[maverick.weaknessWeaponId];
+  const reward = allWeaponsById[maverick.weaponRewardId];
+  const stage = allStagesByMaverickId[maverick.id];
   const weaknessSourceSlug = weakness
-    ? x1MavericksById[weakness.obtainedFrom]?.slug
+    ? allMavericksById[weakness.obtainedFrom]?.slug
     : undefined;
 
   return (
@@ -190,6 +191,11 @@ export default function DossierPage() {
                 <p className="text-[0.62rem] text-[var(--text-muted)]">{stage.location}</p>
               </div>
             </div>
+            {stage.collectibles.length === 0 && (
+              <p className="text-[0.72rem] text-[var(--text-muted)]">
+                Collectible intel for this sector has not been catalogued yet (TODO).
+              </p>
+            )}
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {stage.collectibles.map((c) => {
                 const has = collected.includes(c.id);

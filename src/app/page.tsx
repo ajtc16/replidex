@@ -11,14 +11,10 @@ import { ProgressMeter } from "@/components/replidex/ProgressMeter";
 import { MissionCard } from "@/components/replidex/MissionCard";
 import { MaverickCard } from "@/components/replidex/MaverickCard";
 import { TargetPortrait } from "@/components/replidex/TargetPortrait";
-import {
-  x1Game,
-  x1Mavericks,
-  x1MavericksById,
-  x1Stages,
-  x1WeaponsById,
-} from "@/data/x1";
+import { GameSwitcher } from "@/components/replidex/GameSwitcher";
+import { getGameData } from "@/data/registry";
 import { useProgressStore } from "@/stores/progress.store";
+import { useGameStore } from "@/stores/game.store";
 import { computeCompletion } from "@/services/progress";
 import { getNextRecommendedTarget } from "@/services/recommendations";
 
@@ -33,47 +29,78 @@ const GLOBE_MARKERS = [
 export default function CommandPage() {
   const progress = useProgressStore();
   const hydrated = useProgressStore((s) => s.hydrated);
+  const seriesId = useGameStore((s) => s.seriesId);
+  const gameHydrated = useGameStore((s) => s.hydrated);
 
-  const completion = useMemo(
-    () => computeCompletion(progress, x1Mavericks.length, x1Stages),
-    [progress],
+  const { game, mavericks, mavericksById, weaponsById, stages } = useMemo(() => {
+    const d = getGameData(seriesId);
+    return {
+      game: d.game,
+      mavericks: d.mavericks,
+      mavericksById: Object.fromEntries(d.mavericks.map((m) => [m.id, m])),
+      weaponsById: d.weaponsById,
+      stages: d.stages,
+    };
+  }, [seriesId]);
+
+  // In-game defeats only (progress is global; scope dashboard to active game).
+  const gameDefeats = useMemo(
+    () => progress.defeatedMavericks.filter((id) => mavericksById[id]),
+    [progress.defeatedMavericks, mavericksById],
   );
 
-  const activeSignals = x1Mavericks.length - progress.defeatedMavericks.length;
+  const completion = useMemo(
+    () =>
+      computeCompletion(
+        { ...progress, defeatedMavericks: gameDefeats },
+        mavericks.length,
+        stages,
+      ),
+    [progress, gameDefeats, mavericks.length, stages],
+  );
+
+  const activeSignals = mavericks.length - gameDefeats.length;
 
   const nextTarget = useMemo(
-    () => getNextRecommendedTarget(progress, x1Mavericks, x1WeaponsById),
-    [progress],
+    () => getNextRecommendedTarget(progress, mavericks, weaponsById),
+    [progress, mavericks, weaponsById],
   );
 
   const recentDeployments = useMemo(
     () =>
-      progress.defeatedMavericks
+      gameDefeats
         .slice(-3)
         .reverse()
-        .map((id) => x1MavericksById[id])
+        .map((id) => mavericksById[id])
         .filter(Boolean),
-    [progress.defeatedMavericks],
+    [gameDefeats, mavericksById],
   );
 
   const highValueTargets = useMemo(
-    () => x1Mavericks.filter((m) => !progress.defeatedMavericks.includes(m.id)).slice(0, 4),
-    [progress.defeatedMavericks],
+    () => mavericks.filter((m) => !progress.defeatedMavericks.includes(m.id)).slice(0, 4),
+    [mavericks, progress.defeatedMavericks],
   );
 
   return (
     <div>
       <HudHeader
         title="Replidex"
-        subtitle="Maverick Hunter Command Network · X1"
+        subtitle={`Maverick Hunter Command Network · ${seriesId.toUpperCase()}`}
         action={
-          <StatusBadge
-            label={activeSignals > 4 ? "Status: Critical" : "Status: Elevated"}
-            tone={activeSignals > 4 ? "danger" : "amber"}
-            pulse
-          />
+          <div className="flex items-center gap-2">
+            <GameSwitcher className="hidden sm:flex" />
+            <StatusBadge
+              label={activeSignals > 4 ? "Status: Critical" : "Status: Elevated"}
+              tone={activeSignals > 4 ? "danger" : "amber"}
+              pulse
+            />
+          </div>
         }
       />
+
+      <div className="px-3 pt-3 sm:hidden">
+        <GameSwitcher />
+      </div>
 
       <div className="grid gap-3 p-3 lg:grid-cols-3">
         {/* Tactical deployment */}
@@ -86,7 +113,7 @@ export default function CommandPage() {
           <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
             <TacticalGlobe markers={hydrated ? GLOBE_MARKERS.slice(0, Math.max(1, activeSignals - 2)) : GLOBE_MARKERS} />
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-1">
-              <Stat icon={Radio} label="Active Signals" value={hydrated ? activeSignals : x1Mavericks.length} tone="var(--danger)" />
+              <Stat icon={Radio} label="Active Signals" value={hydrated && gameHydrated ? activeSignals : mavericks.length} tone="var(--danger)" />
               <Stat icon={Activity} label="Hunters Online" value={3} tone="var(--tactical-cyan)" />
               <Stat icon={ShieldAlert} label="Threats Escalating" value={hydrated ? Math.min(2, activeSignals) : 2} tone="var(--tactical-amber)" />
             </div>
@@ -96,9 +123,9 @@ export default function CommandPage() {
         {/* Current hunt */}
         <TacticalPanel title="Current Hunt">
           <p className="font-heading text-lg font-bold uppercase text-[var(--text-primary)]">
-            {x1Game.title}
+            {game.title}
           </p>
-          <p className="mb-3 text-[0.68rem] text-[var(--text-muted)]">{x1Game.subtitle}</p>
+          <p className="mb-3 text-[0.68rem] text-[var(--text-muted)]">{game.subtitle}</p>
 
           <div className="space-y-2.5 text-[0.72rem]">
             <StatLine label="Bosses Defeated" value={`${completion.bossesDefeated} / ${completion.bossesTotal}`} />
@@ -178,8 +205,8 @@ export default function CommandPage() {
               <MaverickCard
                 key={m.id}
                 maverick={m}
-                weaknessWeapon={x1WeaponsById[m.weaknessWeaponId]}
-                rewardWeapon={x1WeaponsById[m.weaponRewardId]}
+                weaknessWeapon={weaponsById[m.weaknessWeaponId]}
+                rewardWeapon={weaponsById[m.weaponRewardId]}
                 defeated={progress.defeatedMavericks.includes(m.id)}
               />
             ))}

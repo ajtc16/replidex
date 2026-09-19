@@ -45,6 +45,9 @@ export function getRecommendedTargets(
   weaponsById: Record<string, Weapon>,
 ): RecommendedTarget[] {
   const owned = ownedWeaponIds(progress, mavericks);
+  // Canonical opener = first boss in the (weakness-ordered) list for this game.
+  const openerId = mavericks[0]?.id;
+  const coldOpen = progress.defeatedMavericks.length === 0 && owned.size === 0;
 
   const results: RecommendedTarget[] = mavericks
     .filter((m) => !progress.defeatedMavericks.includes(m.id))
@@ -58,13 +61,12 @@ export function getRecommendedTargets(
       if (haveWeakness && weaknessWeapon) {
         score += 100;
         reason = `${weaknessWeapon.name} detected in inventory. Target weakness confirmed.`;
-      } else if (progress.defeatedMavericks.length === 0) {
-        // Cold open: nudge toward the classic first target (no weapons yet).
-        if (m.weaknessWeaponId === "fire-wave" && m.id === "chill-penguin") {
-          score += 20;
-          reason =
-            "No weapons acquired. Recommended opener — low recovery and drops mobility-critical Shotgun Ice.";
-        }
+      } else if (coldOpen && m.id === openerId) {
+        // No weapons yet — nudge toward the canonical opener for this game.
+        score += 20;
+        reason = `No weapons acquired. Recommended opener — drops ${
+          weaponsById[m.weaponRewardId]?.name ?? "the first chain weapon"
+        } to start the exploit chain.`;
       }
 
       return { maverick: m, score, reason, weaknessWeapon };
@@ -93,17 +95,8 @@ export function buildRoute(
   mavericks: Maverick[],
   weaponsById: Record<string, Weapon>,
 ): RouteNode[] {
-  // Seed order: classic X1 weakness loop starting from Chill Penguin.
-  const weaknessOrder = [
-    "chill-penguin",
-    "spark-mandrill",
-    "armored-armadillo",
-    "launch-octopus",
-    "boomer-kuwanger",
-    "sting-chameleon",
-    "storm-eagle",
-    "flame-mammoth",
-  ];
+  // The mavericks list is already in canonical weakness-chain order for its game.
+  const weaknessOrder = mavericks.map((m) => m.id);
 
   // Beginner route front-loads the lowest-threat targets (fought with the
   // buster) rather than juggling weapons; ties break toward the weakness loop.

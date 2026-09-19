@@ -7,17 +7,15 @@ import { TacticalPanel } from "@/components/replidex/TacticalPanel";
 import { RouteCard } from "@/components/replidex/RouteCard";
 import { ProgressMeter } from "@/components/replidex/ProgressMeter";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
-import {
-  x1Mavericks,
-  x1WeaponsById,
-  x1StagesByMaverickId,
-} from "@/data/x1";
+import { GameSwitcher } from "@/components/replidex/GameSwitcher";
+import { getGameData } from "@/data/registry";
 import {
   buildRoute,
   getNextRecommendedTarget,
   type RouteMode,
 } from "@/services/recommendations";
 import { useProgressStore } from "@/stores/progress.store";
+import { useGameStore } from "@/stores/game.store";
 import { cn } from "@/lib/cn";
 
 interface ModeOption {
@@ -39,16 +37,22 @@ export default function RoutePage() {
   const hydrated = useProgressStore((s) => s.hydrated);
   const toggleMaverick = useProgressStore((s) => s.toggleMaverick);
   const resetProgress = useProgressStore((s) => s.resetProgress);
+  const seriesId = useGameStore((s) => s.seriesId);
   const [mode, setMode] = useState<RouteMode>("weakness");
 
+  const { mavericks, weaponsById, stagesByMaverickId } = useMemo(
+    () => getGameData(seriesId),
+    [seriesId],
+  );
+
   const route = useMemo(
-    () => buildRoute(mode, progress, x1Mavericks, x1WeaponsById),
-    [mode, progress],
+    () => buildRoute(mode, progress, mavericks, weaponsById),
+    [mode, progress, mavericks, weaponsById],
   );
 
   const next = useMemo(
-    () => getNextRecommendedTarget(progress, x1Mavericks, x1WeaponsById),
-    [progress],
+    () => getNextRecommendedTarget(progress, mavericks, weaponsById),
+    [progress, mavericks, weaponsById],
   );
 
   const completed = route.filter((n) => n.status === "complete").length;
@@ -58,11 +62,18 @@ export default function RoutePage() {
     <div>
       <HudHeader
         title="Hunter Route"
-        subtitle="Deployment sequencing computed from live progress"
+        subtitle={`Deployment sequencing · ${seriesId.toUpperCase()}`}
         action={
-          <StatusBadge label={`${completed}/${route.length} Cleared`} tone={completed === route.length ? "green" : "cyan"} />
+          <div className="flex items-center gap-2">
+            <GameSwitcher className="hidden sm:flex" />
+            <StatusBadge label={`${completed}/${route.length} Cleared`} tone={completed === route.length ? "green" : "cyan"} />
+          </div>
         }
       />
+
+      <div className="px-3 pt-3 sm:hidden">
+        <GameSwitcher />
+      </div>
 
       <div className="space-y-3 p-3">
         {/* Mode selector */}
@@ -129,7 +140,7 @@ export default function RoutePage() {
             <div key={node.maverick.id}>
               <RouteCard
                 node={node}
-                collectibles={x1StagesByMaverickId[node.maverick.id]?.collectibles ?? []}
+                collectibles={stagesByMaverickId[node.maverick.id]?.collectibles ?? []}
                 collectedIds={progress.collectedItems}
                 onToggleDefeat={toggleMaverick}
               />

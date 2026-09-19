@@ -4,7 +4,7 @@
 
 > Design principle: **Sci-fi outside, modern app inside.** Tactical/HUD aesthetics, but usability, readability, and responsiveness come first.
 
-MVP covers **Mega Man X1**, architected so X2–X8 can be added without rewrites.
+Covers the **entire mainline series, Mega Man X1–X8** — 64 Mavericks with verified weakness chains, weapon rewards, and per-game routes. X1 is hand-authored in depth; X2–X8 are built from verified seed data.
 
 ## Stack
 
@@ -72,4 +72,5 @@ src/
 - ✅ **Phase 2** — Progress tracking, weakness graph, Hunter Route + recommendations
 - ✅ **Phase 3** — Intel Hub, Archive, Blueprint Archive + Viewer
 - ✅ **Phase 4** — PWA (manifest + service worker), accessibility, motion
-- ⏭️ **Next** — Expand to X2–X8; optional Supabase-backed cloud progress
+- ✅ **X2–X8 expansion** — all 64 Mavericks, per-game weakness chains, game switcher
+- ⏭️ **Next** — Catalogue stage collectibles/blueprints for X2–X8; optional Supabase-backed cloud progress

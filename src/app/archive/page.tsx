@@ -13,29 +13,24 @@ import { HudHeader } from "@/components/replidex/HudHeader";
 import { TacticalPanel } from "@/components/replidex/TacticalPanel";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
 import { ElementBadge } from "@/components/replidex/ElementBadge";
-import {
-  x1Mavericks,
-  x1Weapons,
-  x1Characters,
-  x1Blueprints,
-  x1Stages,
-} from "@/data/x1";
+import { x1Weapons, x1Characters, x1Blueprints } from "@/data/x1";
+import { allMavericks, allWeapons, allStages } from "@/data/registry";
 
-const armorCount = x1Stages
+const armorCount = allStages
   .flatMap((s) => s.collectibles)
   .filter((c) => c.type === "armor-upgrade").length;
-const itemCount = x1Stages
+const itemCount = allStages
   .flatMap((s) => s.collectibles)
   .filter((c) => c.type !== "armor-upgrade").length;
 
 const CATEGORIES = [
-  { icon: Crosshair, label: "Mavericks", count: x1Mavericks.length, href: "/targets", tone: "var(--danger)" },
+  { icon: Crosshair, label: "Mavericks", count: allMavericks.length, href: "/targets", tone: "var(--danger)" },
   { icon: DraftingCompass, label: "Blueprints", count: x1Blueprints.length, href: "/archive/blueprints", tone: "var(--tactical-cyan)", featured: true },
-  { icon: Swords, label: "Weapons", count: x1Weapons.length, href: "#weapons", tone: "var(--tactical-amber)" },
+  { icon: Swords, label: "Weapons", count: allWeapons.length, href: "#weapons", tone: "var(--tactical-amber)" },
   { icon: Users, label: "Characters", count: x1Characters.length, href: "#characters", tone: "var(--tactical-cyan)" },
   { icon: Shield, label: "Armor", count: armorCount, href: "#weapons", tone: "var(--tactical-green)" },
   { icon: Package, label: "Items", count: itemCount, href: "#", tone: "var(--tactical-amber)" },
-  { icon: MapPin, label: "Locations", count: x1Stages.length, href: "#", tone: "var(--el-air)" },
+  { icon: MapPin, label: "Locations", count: allStages.length, href: "#", tone: "var(--el-air)" },
 ];
 
 export default function ArchivePage() {

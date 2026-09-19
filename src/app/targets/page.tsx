@@ -6,7 +6,7 @@ import { HudHeader } from "@/components/replidex/HudHeader";
 import { MaverickCard } from "@/components/replidex/MaverickCard";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
 import type { ElementType } from "@/domain/types";
-import { x1Mavericks, x1WeaponsById } from "@/data/x1";
+import { allMavericks, allWeaponsById, games } from "@/data/registry";
 import { ELEMENT_META } from "@/lib/elements";
 import { useProgressStore } from "@/stores/progress.store";
 import { cn } from "@/lib/cn";
@@ -14,8 +14,13 @@ import { cn } from "@/lib/cn";
 type StatusFilter = "all" | "active" | "cleared";
 
 const ELEMENT_OPTIONS = Object.entries(ELEMENT_META)
-  .filter(([k]) => x1Mavericks.some((m) => m.element === k))
+  .filter(([k]) => allMavericks.some((m) => m.element === k))
   .map(([k, v]) => ({ value: k as ElementType, label: v.label }));
+
+const SERIES_OPTIONS = [
+  { value: "all", label: "All Series" },
+  ...games.map((g) => ({ value: g.id, label: `${g.id.toUpperCase()} — ${g.title}` })),
+];
 
 export default function TargetDatabasePage() {
   const defeated = useProgressStore((s) => s.defeatedMavericks);
@@ -27,7 +32,7 @@ export default function TargetDatabasePage() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return x1Mavericks.filter((m) => {
+    return allMavericks.filter((m) => {
       if (q && !`${m.name} ${m.species ?? ""} ${m.location}`.toLowerCase().includes(q)) return false;
       if (series !== "all" && m.series !== series) return false;
       if (element !== "all" && m.element !== element) return false;
@@ -43,7 +48,7 @@ export default function TargetDatabasePage() {
       <HudHeader
         title="Target Database"
         subtitle="Search & filter Maverick threat records"
-        action={<StatusBadge label={`${results.length} / ${x1Mavericks.length}`} tone="cyan" />}
+        action={<StatusBadge label={`${results.length} / ${allMavericks.length}`} tone="cyan" />}
       />
 
       <div className="p-3">
@@ -72,7 +77,7 @@ export default function TargetDatabasePage() {
         {/* Filters */}
         {showFilters && (
           <div className="mt-3 grid gap-3 border border-[var(--border)] bg-[var(--surface)] p-3 sm:grid-cols-3">
-            <Select label="Series" value={series} onChange={setSeries} options={[{ value: "all", label: "All Series" }, { value: "x1", label: "X1 — Maverick Uprising" }]} />
+            <Select label="Series" value={series} onChange={setSeries} options={SERIES_OPTIONS} />
             <Select
               label="Element"
               value={element}
@@ -109,8 +114,8 @@ export default function TargetDatabasePage() {
             <MaverickCard
               key={m.id}
               maverick={m}
-              weaknessWeapon={x1WeaponsById[m.weaknessWeaponId]}
-              rewardWeapon={x1WeaponsById[m.weaponRewardId]}
+              weaknessWeapon={allWeaponsById[m.weaknessWeaponId]}
+              rewardWeapon={allWeaponsById[m.weaponRewardId]}
               defeated={defeated.includes(m.id)}
             />
           ))}
