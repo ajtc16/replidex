@@ -33,8 +33,9 @@
 
   /* --- Text --- */
   --text-primary: #eaf2f4;
-  --text-secondary: #9db2ba;
-  --text-muted: #5c7078;
+  --text-secondary: #a6bbc2;
+  /* muted tuned to ~4.9:1 on --background for AA small-text contrast */
+  --text-muted: #6f858d;
 
   /* --- Elemental colors --- */
   --el-ice: #6fc7e8;

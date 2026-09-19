@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Oswald, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNavigation, SideNavigation } from "@/components/replidex/BottomNavigation";
+import { PageTransition } from "@/components/replidex/PageTransition";
+import { ServiceWorkerRegister } from "@/components/replidex/ServiceWorkerRegister";
 
 const heading = Oswald({
   subsets: ["latin"],
@@ -43,11 +45,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable}`}>
       <body className="min-h-dvh">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:border focus:border-[var(--border-active)] focus:bg-[var(--surface)] focus:px-3 focus:py-2 focus:text-[var(--tactical-amber)]"
+        >
+          Skip to content
+        </a>
         <div className="mx-auto flex min-h-dvh w-full max-w-6xl">
           <SideNavigation />
-          <main className="min-w-0 flex-1 pb-20 lg:pb-0">{children}</main>
+          <main id="main-content" className="min-w-0 flex-1 pb-20 lg:pb-0">
+            <PageTransition>{children}</PageTransition>
+          </main>
         </div>
         <BottomNavigation />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

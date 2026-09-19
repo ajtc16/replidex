@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# REPLIDEX
 
-## Getting Started
+**Maverick Hunter Tactical Database** — an immersive, in-universe tactical companion for the _Mega Man X_ universe. A "Pokédex for Mega Man X" that feels like a Maverick Hunter command terminal.
 
-First, run the development server:
+> Design principle: **Sci-fi outside, modern app inside.** Tactical/HUD aesthetics, but usability, readability, and responsiveness come first.
+
+MVP covers **Mega Man X1**, architected so X2–X8 can be added without rewrites.
+
+## Stack
+
+- **Next.js 16** (App Router) · **React 19** · **TypeScript** (strict)
+- **Tailwind CSS v4** (CSS-first design tokens)
+- **Zustand** + `localStorage` persistence · **Zod**-ready domain layer
+- **Framer Motion** (subtle transitions) · **lucide-react**
+- PWA: web manifest + service worker (offline app shell)
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Quality gates:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx tsc --noEmit   # typecheck
+npx eslint .       # lint
+npm run build      # production build
+```
 
-## Learn More
+> The service worker is registered in **production only**. To exercise offline mode: `npm run build && npm run start`, then toggle offline in DevTools.
 
-To learn more about Next.js, take a look at the following resources:
+## Screens
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Screen | Notes |
+| --- | --- | --- |
+| `/` | Command | Tactical globe, live stats, current hunt, next recommended target |
+| `/targets` | Target Database | Search + Series/Element/Status filters |
+| `/targets/[slug]` | Target Dossier | Weakness/reward, abilities, stage intel, weakness chain |
+| `/route` | Hunter Route | Beginner / Boss-Weakness modes, live locked→available→complete |
+| `/intel` | Intel Hub | Briefings · Comm-Link · Tactical Logs (logs generated from progress) |
+| `/archive` | Archive | Category grid + weapon/character codex |
+| `/archive/blueprints` | Blueprint Archive | Entity-type filters |
+| `/archive/blueprints/[slug]` | Blueprint Viewer | SVG schematics, clickable callouts, inspector |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure
 
-## Deploy on Vercel
+```
+src/
+  app/            # routes (App Router)
+  components/replidex/   # tactical UI system (TacticalPanel, BlueprintViewer, …)
+  data/x1/        # X1 dataset (mavericks, weapons, stages, characters, blueprints, intel)
+  domain/types.ts # presentation-agnostic domain model
+  services/       # weaknessGraph, recommendations, progress, logs (pure functions)
+  stores/         # progress.store.ts (Zustand + localStorage)
+  lib/            # elements, cn helper
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Design principles baked in
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Data is separate from UI.** All lore lives in `src/data`; components render from it.
+- **Relationships are computed, not hardcoded.** Weakness chains and route recommendations are derived by `services/`, never authored as UI text or arrows.
+- **One shared progress store** drives the dashboard, target cards, route, intel logs, and completion %.
+- **No copyrighted sprites.** Portraits are glyphs on blueprint tiles; schematics are generated SVG.
+
+## Roadmap
+
+- ✅ **Phase 1** — Design tokens, app shell, X1 data, Command / Targets / Dossier
+- ✅ **Phase 2** — Progress tracking, weakness graph, Hunter Route + recommendations
+- ✅ **Phase 3** — Intel Hub, Archive, Blueprint Archive + Viewer
+- ✅ **Phase 4** — PWA (manifest + service worker), accessibility, motion
+- ⏭️ **Next** — Expand to X2–X8; optional Supabase-backed cloud progress
