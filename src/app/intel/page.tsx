@@ -19,6 +19,7 @@ import {
 } from "@/data/registry";
 import { generateLogs } from "@/services/logs";
 import { useProgressStore } from "@/stores/progress.store";
+import { onTabListKeyDown, rovingTabIndex } from "@/lib/tablist";
 import { cn } from "@/lib/cn";
 
 type Tab = "briefings" | "comm" | "logs";
@@ -58,6 +59,7 @@ export default function IntelPage() {
         <div
           role="tablist"
           aria-label="Intel sections"
+          onKeyDown={onTabListKeyDown}
           className="flex border border-[var(--border)] bg-[var(--surface-inset)] p-1"
         >
           {TABS.map((t) => (
@@ -65,6 +67,7 @@ export default function IntelPage() {
               key={t.id}
               role="tab"
               aria-selected={tab === t.id}
+              tabIndex={rovingTabIndex(tab === t.id)}
               onClick={() => setTab(t.id)}
               className={cn(
                 "tac-label flex-1 py-2 text-[0.6rem] transition-colors",

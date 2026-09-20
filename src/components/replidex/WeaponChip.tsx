@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WeaponArtwork } from "./WeaponArtwork";
 import type { Weapon } from "@/domain/types";
 import { elementMeta } from "@/lib/elements";
 import { cn } from "@/lib/cn";
@@ -40,19 +41,19 @@ export function WeaponChip({
       }}
     >
       <span
-        className="grid h-5 w-5 place-items-center border text-[0.7rem]"
+        className="grid h-10 w-10 shrink-0 place-items-center border text-[0.7rem]"
         style={{ borderColor: tone, color: tone }}
         aria-hidden
       >
-        {meta.glyph}
+        <WeaponArtwork id={weapon.id} />
       </span>
       <span className="flex flex-col leading-tight">
         {LABELS[variant] && (
-          <span className="tac-label text-[0.5rem]" style={{ color: tone }}>
+          <span className="tac-label text-[0.65rem]" style={{ color: tone }}>
             {LABELS[variant]}
           </span>
         )}
-        <span className="text-[0.78rem] font-semibold text-[var(--text-primary)]">
+        <span className="text-sm font-semibold text-[var(--text-primary)]">
           {weapon.name}
         </span>
       </span>

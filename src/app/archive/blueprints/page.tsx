@@ -7,6 +7,8 @@ import { HudHeader } from "@/components/replidex/HudHeader";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
 import type { Blueprint } from "@/domain/types";
 import { x1Blueprints } from "@/data/x1";
+import { ReploidSchematic } from "@/components/replidex/ReploidSchematic";
+import { TargetPortrait } from "@/components/replidex/TargetPortrait";
 import { cn } from "@/lib/cn";
 
 type EntityFilter = "all" | Blueprint["entityType"];
@@ -84,9 +86,9 @@ export default function BlueprintArchivePage() {
                   backgroundSize: "16px 16px",
                 }}
               >
-                <span className="absolute inset-0 grid place-items-center font-heading text-4xl font-black text-[color-mix(in_srgb,var(--tactical-cyan)_60%,transparent)]">
-                  {b.name.charAt(0)}
-                </span>
+                <div className="absolute inset-0 flex justify-center">
+                  {b.slug === "x" ? <ReploidSchematic view="front" entityId="x" /> : <TargetPortrait glyph={b.slug} size="lg" className="h-full w-28" />}
+                </div>
                 <span className="tac-label absolute left-2 top-2 text-[0.5rem] text-[var(--tactical-cyan)]">
                   {b.entityType}
                 </span>

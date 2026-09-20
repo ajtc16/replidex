@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TargetPortrait } from "./TargetPortrait";
 import { Radio } from "lucide-react";
 import type { Transmission } from "@/data/x1/intel";
 import { cn } from "@/lib/cn";
@@ -13,13 +14,7 @@ export function CommLinkCard({ transmission, maverickSlug }: CommLinkCardProps) 
     <article className="relative border border-[var(--border)] bg-[var(--surface)]">
       {/* channel header */}
       <header className="flex items-center gap-2.5 border-b border-[var(--border)] bg-[var(--surface-inset)] px-3 py-2">
-        <span
-          className="grid h-9 w-9 shrink-0 place-items-center border border-[var(--tactical-cyan)] text-lg"
-          style={{ background: "color-mix(in srgb, var(--tactical-cyan) 10%, transparent)" }}
-          aria-hidden
-        >
-          {transmission.glyph}
-        </span>
+        <TargetPortrait glyph={transmission.sender} size="md" className="shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="font-heading text-sm font-bold uppercase tracking-wide text-[var(--tactical-cyan)]">
             {transmission.senderName}

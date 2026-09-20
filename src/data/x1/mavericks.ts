@@ -19,7 +19,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Arctic Base",
     description:
       "A cold, calculating Maverick who has sealed an ocean base in perpetual ice. Freezes anything that moves and covers his arena in slick terrain.",
-    portrait: "🐧",
+    portrait: "chill-penguin",
     weaknessWeaponId: "fire-wave",
     weaponRewardId: "shotgun-ice",
     threatLevel: 3,
@@ -49,7 +49,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Power Plant",
     description:
       "A brutish Maverick charged with raw voltage, guarding a hijacked power facility. Overloads the lighting and lunges through the dark.",
-    portrait: "🦍",
+    portrait: "spark-mandrill",
     weaknessWeaponId: "shotgun-ice",
     weaponRewardId: "electric-spark",
     threatLevel: 3,
@@ -77,7 +77,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Energy Mine",
     description:
       "A heavily plated Maverick who curls into an invulnerable ball and ricochets around a subterranean energy mine.",
-    portrait: "🦔",
+    portrait: "armored-armadillo",
     weaknessWeaponId: "electric-spark",
     weaponRewardId: "rolling-shield",
     threatLevel: 3,
@@ -105,7 +105,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Ocean Base",
     description:
       "A naval Maverick commanding a submerged fortress. Fills the water with homing missiles and whirlpools that drag X around.",
-    portrait: "🐙",
+    portrait: "launch-octopus",
     weaknessWeaponId: "rolling-shield",
     weaponRewardId: "homing-torpedo",
     threatLevel: 4,
@@ -133,7 +133,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Central Tower",
     description:
       "A blinding-fast Maverick who teleports around a towering spire, snatching X with his horns and hurling him into walls.",
-    portrait: "🪲",
+    portrait: "boomer-kuwanger",
     weaknessWeaponId: "homing-torpedo",
     weaponRewardId: "boomerang-cutter",
     threatLevel: 4,
@@ -161,7 +161,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Jungle Ruins",
     description:
       "A stealth Maverick lurking in overgrown ruins. Cloaks himself invisible and drops from the ceiling with a barbed tongue.",
-    portrait: "🦎",
+    portrait: "sting-chameleon",
     weaknessWeaponId: "boomerang-cutter",
     weaponRewardId: "chameleon-sting",
     threatLevel: 4,
@@ -189,7 +189,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Airport",
     description:
       "An aerial Maverick who has commandeered an airborne carrier. Rules the skies with gale-force winds that shove X off the deck.",
-    portrait: "🦅",
+    portrait: "storm-eagle",
     weaknessWeaponId: "chameleon-sting",
     weaponRewardId: "storm-tornado",
     threatLevel: 4,
@@ -218,7 +218,7 @@ export const x1Mavericks: Maverick[] = [
     location: "Weapons Refinery",
     description:
       "A hulking Maverick stomping through a molten refinery. Floods the floor with oil and fire and quakes the ground with every step.",
-    portrait: "🐘",
+    portrait: "flame-mammoth",
     weaknessWeaponId: "storm-tornado",
     weaponRewardId: "fire-wave",
     threatLevel: 3,

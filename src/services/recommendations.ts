@@ -2,6 +2,7 @@ import type {
   Maverick,
   PlayerProgress,
   RouteNode,
+  Stage,
   TargetStatus,
   Weapon,
 } from "@/domain/types";
@@ -83,32 +84,63 @@ export function getNextRecommendedTarget(
   return getRecommendedTargets(progress, mavericks, weaponsById)[0];
 }
 
-export type RouteMode = "beginner" | "weakness";
+export type RouteMode = "beginner" | "weakness" | "collect" | "minimal";
 
 /**
- * Ordered clear route. "weakness" follows the exploit loop; "beginner" is a
- * gentler ordering that still respects weapon dependencies.
+ * Ordering strategy per mode. The mavericks list is already in canonical
+ * weakness-chain order, so `weakness`/`minimal` follow it directly. `beginner`
+ * front-loads low-threat fights; `collect` front-loads stages whose upgrades
+ * unlock collectibles elsewhere (and then the richest stages).
+ */
+function orderFor(
+  mode: RouteMode,
+  mavericks: Maverick[],
+  stagesByMaverickId: Record<string, Stage>,
+): string[] {
+  const canonical = mavericks.map((m) => m.id);
+  const loopIndex = (id: string) => canonical.indexOf(id);
+
+  if (mode === "weakness" || mode === "minimal") return canonical;
+
+  if (mode === "beginner") {
+    const threat = (id: string) => mavericks.find((m) => m.id === id)?.threatLevel ?? 3;
+    return [...canonical].sort((a, b) => threat(a) - threat(b) || loopIndex(a) - loopIndex(b));
+  }
+
+  // collect: prioritise stages granting an armor upgrade that other stages
+  // require, then the richest stages, then canonical order.
+  const requiredIds = new Set(
+    Object.values(stagesByMaverickId)
+      .flatMap((s) => s.collectibles)
+      .flatMap((c) => c.requires ?? []),
+  );
+  const unlockScore = (id: string) =>
+    (stagesByMaverickId[id]?.collectibles ?? []).filter(
+      (c) => c.type === "armor-upgrade" && requiredIds.has(c.id),
+    ).length;
+  const collectCount = (id: string) =>
+    stagesByMaverickId[id]?.collectibles.length ?? 0;
+
+  return [...canonical].sort(
+    (a, b) =>
+      unlockScore(b) - unlockScore(a) ||
+      collectCount(b) - collectCount(a) ||
+      loopIndex(a) - loopIndex(b),
+  );
+}
+
+/**
+ * Ordered clear route for the active game. Only `weakness` gates targets behind
+ * owned weapons; the other modes leave every stage available.
  */
 export function buildRoute(
   mode: RouteMode,
   progress: PlayerProgress,
   mavericks: Maverick[],
   weaponsById: Record<string, Weapon>,
+  stagesByMaverickId: Record<string, Stage> = {},
 ): RouteNode[] {
-  // The mavericks list is already in canonical weakness-chain order for its game.
-  const weaknessOrder = mavericks.map((m) => m.id);
-
-  // Beginner route front-loads the lowest-threat targets (fought with the
-  // buster) rather than juggling weapons; ties break toward the weakness loop.
-  const loopIndex = (id: string) => weaknessOrder.indexOf(id);
-  const beginnerOrder = [...weaknessOrder].sort((a, b) => {
-    const ta = mavericks.find((m) => m.id === a)?.threatLevel ?? 3;
-    const tb = mavericks.find((m) => m.id === b)?.threatLevel ?? 3;
-    return ta - tb || loopIndex(a) - loopIndex(b);
-  });
-
-  const order = mode === "weakness" ? weaknessOrder : beginnerOrder;
-
+  const order = orderFor(mode, mavericks, stagesByMaverickId);
   const owned = ownedWeaponIds(progress, mavericks);
   let frontAssigned = false; // the first undefeated node is the current "front"
 
@@ -120,15 +152,15 @@ export function buildRoute(
       const weaponReward = weaponsById[maverick.weaponRewardId];
       const defeated = progress.defeatedMavericks.includes(maverick.id);
       const haveWeakness = weaknessWeapon ? owned.has(weaknessWeapon.id) : false;
+      const collectibles = stagesByMaverickId[maverick.id]?.collectibles ?? [];
 
       let status: TargetStatus;
       if (defeated) {
         status = "complete";
-      } else if (mode === "beginner") {
-        // Beginner mode leans on the buster: nothing is gated behind weapons.
+      } else if (mode !== "weakness") {
+        // Only the weakness route gates stages; other modes stay open.
         status = "available";
       } else if (haveWeakness || !frontAssigned) {
-        // Weakness mode: exploitable now, or this is the current front.
         status = "available";
         frontAssigned = true;
       } else {
@@ -140,6 +172,15 @@ export function buildRoute(
         reason = `Neutralized.${weaponReward ? ` ${weaponReward.name} acquired.` : ""}`;
       } else if (haveWeakness && weaknessWeapon) {
         reason = `You possess ${weaknessWeapon.name} — exploit the weakness for a fast clear.`;
+      } else if (mode === "collect") {
+        const grantsUnlock = collectibles.some((c) => c.type === "armor-upgrade");
+        reason = grantsUnlock
+          ? "Clear early — its upgrade unlocks collectibles elsewhere."
+          : collectibles.length > 0
+            ? `${collectibles.length} collectible${collectibles.length > 1 ? "s" : ""} catalogued in this sector.`
+            : "No catalogued collectibles yet.";
+      } else if (mode === "minimal") {
+        reason = "Single-pass target — weapons flow forward, no return trip required.";
       } else if (index === 0) {
         reason =
           mode === "beginner"

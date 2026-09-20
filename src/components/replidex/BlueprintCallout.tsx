@@ -19,7 +19,7 @@ export function BlueprintCallout({ module, active, onSelect }: BlueprintCalloutP
       onClick={() => onSelect(module.id)}
       aria-pressed={active}
       aria-label={`${module.name} — ${module.category}`}
-      className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
+      className="absolute grid h-11 w-11 place-items-center -translate-x-1/2 -translate-y-1/2"
       style={{ left: `${module.position.x}%`, top: `${module.position.y}%` }}
     >
       <span className="relative grid place-items-center">

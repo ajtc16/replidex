@@ -27,10 +27,17 @@ interface ModeOption {
 const MODES: ModeOption[] = [
   { id: "beginner", label: "Beginner Friendly", available: true },
   { id: "weakness", label: "Boss Weakness", available: true },
-  { id: "collect", label: "Collect Everything", available: false },
-  { id: "minimal", label: "Minimum Backtracking", available: false },
+  { id: "collect", label: "Collect Everything", available: true },
+  { id: "minimal", label: "Minimum Backtracking", available: true },
   { id: "custom", label: "Custom", available: false },
 ];
+
+const MODE_BADGE: Record<RouteMode, string> = {
+  weakness: "Weakness Exploit",
+  beginner: "Buster Route",
+  collect: "Completionist",
+  minimal: "Single Pass",
+};
 
 export default function RoutePage() {
   const progress = useProgressStore();
@@ -46,8 +53,8 @@ export default function RoutePage() {
   );
 
   const route = useMemo(
-    () => buildRoute(mode, progress, mavericks, weaponsById),
-    [mode, progress, mavericks, weaponsById],
+    () => buildRoute(mode, progress, mavericks, weaponsById, stagesByMaverickId),
+    [mode, progress, mavericks, weaponsById, stagesByMaverickId],
   );
 
   const next = useMemo(
@@ -109,11 +116,11 @@ export default function RoutePage() {
         <TacticalPanel
           title="Tactical Recommendation"
           scanlines
-          action={<StatusBadge label={mode === "weakness" ? "Weakness Exploit" : "Buster Route"} tone="amber" />}
+          action={<StatusBadge label={MODE_BADGE[mode]} tone="amber" />}
         >
           <div className="flex items-start gap-3">
             <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-[var(--tactical-amber)]" aria-hidden />
-            <div>
+            <div role="status" aria-live="polite">
               {hydrated && next ? (
                 <p className="text-[0.82rem] leading-relaxed text-[var(--text-secondary)]">
                   <span className="font-semibold text-[var(--text-primary)]">{next.maverick.name}</span>{" "}

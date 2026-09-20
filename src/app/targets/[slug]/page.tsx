@@ -3,7 +3,7 @@
 import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowLeft, Check, MapPin, Crosshair, ScrollText } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, MapPin, ScrollText } from "lucide-react";
 import { HudHeader } from "@/components/replidex/HudHeader";
 import { TacticalPanel } from "@/components/replidex/TacticalPanel";
 import { TargetPortrait } from "@/components/replidex/TargetPortrait";
@@ -55,10 +55,10 @@ export default function DossierPage() {
     : undefined;
 
   return (
-    <div>
+    <div className="dossier-page">
       <HudHeader
-        title={maverick.name}
-        subtitle={`${maverick.series.toUpperCase()} · Classification: Maverick · ${maverick.location}`}
+        title="Target Dossier"
+        subtitle={`${maverick.series.toUpperCase()} / Hunter intelligence archive`}
         action={
           <Link
             href="/targets"
@@ -69,88 +69,63 @@ export default function DossierPage() {
         }
       />
 
-      <div className="grid gap-3 p-3 lg:grid-cols-3">
-        {/* Portrait + vitals */}
-        <TacticalPanel title="Target Dossier" className="lg:col-span-1" scanlines brackets>
-          <div className="flex flex-col items-center gap-3 text-center">
-            <TargetPortrait glyph={maverick.portrait} element={maverick.element} size="xl" />
-            <div>
-              <h2 className="font-heading text-2xl font-black uppercase text-[var(--text-primary)]">
-                {maverick.name}
-              </h2>
-              <p className="text-[0.68rem] text-[var(--text-muted)]">{maverick.species}</p>
+      <div className="dossier-content">
+        <section className="dossier-hero" aria-labelledby="target-name">
+          <div className="dossier-art">
+            <TargetPortrait glyph={maverick.portrait} element={maverick.element} size="xl" className="dossier-portrait" />
+            <span className="dossier-art-label">VISUAL IDENTIFICATION / X1</span>
+            <span className="dossier-reticle" aria-hidden />
+          </div>
+          <div className="dossier-identity">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="dossier-eyebrow">Maverick dossier</span>
+              <StatusBadge label={isDefeated ? "Neutralized" : "Active threat"} tone={isDefeated ? "green" : "danger"} pulse={!isDefeated} />
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <h2 id="target-name">{maverick.name}</h2>
+            <p className="dossier-location">{maverick.location} <span> / {maverick.species}</span></p>
+            <div className="mt-4 flex flex-wrap items-center gap-4">
               <ElementBadge element={maverick.element} size="md" />
-              <StatusBadge label={isDefeated ? "Neutralized" : "Active"} tone={isDefeated ? "green" : "danger"} pulse={!isDefeated} />
+              <div className="flex items-center gap-2"><span className="dossier-eyebrow">Threat</span><ThreatMeter level={maverick.threatLevel} /></div>
             </div>
-
-            <div className="w-full space-y-2 border-t border-[var(--border)] pt-3 text-left">
-              <Row icon={MapPin} label="Location" value={maverick.location} />
-              <div className="flex items-center justify-between">
-                <span className="tac-label flex items-center gap-1.5 text-[0.6rem] text-[var(--text-muted)]">
-                  <Crosshair className="h-3 w-3" /> Threat
-                </span>
-                <ThreatMeter level={maverick.threatLevel} />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => toggleMaverick(maverick.id)}
-              className={cn(
-                "tac-label mt-1 w-full border py-2.5 text-[0.68rem] transition-colors",
-                isDefeated
-                  ? "border-[var(--tactical-green)] bg-[color-mix(in_srgb,var(--tactical-green)_14%,transparent)] text-[var(--tactical-green)]"
-                  : "border-[var(--border-active)] bg-[color-mix(in_srgb,var(--tactical-amber)_14%,transparent)] text-[var(--tactical-amber)] hover:bg-[color-mix(in_srgb,var(--tactical-amber)_24%,transparent)]",
-              )}
-            >
-              {isDefeated ? "✓ Target Neutralized — Undo" : "Mark as Neutralized"}
-            </button>
+            <Link href={`/archive/blueprints/${maverick.slug === "chill-penguin" ? "chill-penguin" : "x"}`} className="dossier-blueprint-link">
+              {maverick.slug === "chill-penguin" ? "Inspect target blueprint" : "Inspect hunter equipment"} <ArrowUpRight size={14} />
+            </Link>
           </div>
-        </TacticalPanel>
+        </section>
 
-        <div className="space-y-3 lg:col-span-2">
-          {/* Tactical analysis */}
+        <section className="dossier-loadout" aria-label="Combat essentials">
+          <div className="dossier-essential">
+            <span className="dossier-eyebrow text-[var(--danger)]">01 / Primary weakness</span>
+            {weakness ? <WeaponChip weapon={weakness} href={weaknessSourceSlug ? `/targets/${weaknessSourceSlug}` : undefined} variant="weakness" /> : <p>No known weakness.</p>}
+            <p>{maverick.id === "chill-penguin" ? "First encounter? The X-Buster is enough. Save Fire Wave for the rematch." : weakness?.description}</p>
+          </div>
+          <div className="dossier-essential">
+            <span className="dossier-eyebrow text-[var(--tactical-cyan)]">02 / Weapon acquired</span>
+            {reward ? <WeaponChip weapon={reward} variant="reward" /> : <p>No weapon reward.</p>}
+            <p>{maverick.id === "chill-penguin" ? "Copy the cryo weapon. Freeze your next target with Shotgun Ice." : reward?.description}</p>
+          </div>
+          <div className="dossier-essential dossier-next">
+            <span className="dossier-eyebrow">03 / Next advantage</span>
+            {chain?.outgoing ? <Link href={`/targets/${chain.outgoing.maverick.slug}`} className="flex items-center gap-3">
+              <TargetPortrait glyph={chain.outgoing.maverick.portrait} element={chain.outgoing.maverick.element} size="sm" />
+              <span className="flex-1 font-heading text-lg uppercase">{chain.outgoing.maverick.name}</span><ArrowUpRight size={18} />
+            </Link> : <p>No linked target.</p>}
+            <p>Follow the weapon chain to plan your next deployment.</p>
+          </div>
+        </section>
+
+        <div className="dossier-action-bar">
+          <p><span className="dossier-eyebrow">Mission status</span><br />{isDefeated ? "Weapon data recovered. Continue the hunt." : "Review the field intel. Engage when ready."}</p>
+          <button type="button" onClick={() => toggleMaverick(maverick.id)} aria-pressed={isDefeated} className={cn("dossier-complete", isDefeated && "is-complete")}>
+            {isDefeated ? "✓ Neutralized — Undo" : "Mark as neutralized"}
+          </button>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
           <TacticalPanel title="Tactical Analysis">
-            <p className="text-[0.82rem] italic leading-relaxed text-[var(--text-secondary)]">
-              &ldquo;{maverick.description}&rdquo;
-            </p>
-            <p className="tac-label mt-2 text-[0.5rem] text-[var(--text-muted)]">— Replidex Analysis</p>
+            <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{maverick.description}</p>
           </TacticalPanel>
-
-          {/* Weakness + reward */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <TacticalPanel title="Primary Weakness">
-              {weakness ? (
-                <div className="space-y-2">
-                  <WeaponChip
-                    weapon={weakness}
-                    variant="weakness"
-                    href={weaknessSourceSlug ? `/targets/${weaknessSourceSlug}` : undefined}
-                  />
-                  <p className="text-[0.7rem] leading-relaxed text-[var(--text-muted)]">
-                    {weakness.description}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-[var(--text-muted)]">No known weakness.</p>
-              )}
-            </TacticalPanel>
-
-            <TacticalPanel title="Weapon Acquired">
-              {reward ? (
-                <div className="space-y-2">
-                  <WeaponChip weapon={reward} variant="reward" />
-                  <p className="text-[0.7rem] leading-relaxed text-[var(--text-muted)]">
-                    {reward.description}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-[var(--text-muted)]">No weapon reward.</p>
-              )}
-            </TacticalPanel>
-          </div>
 
           {/* Abilities & patterns */}
           <TacticalPanel title="Abilities & Attack Patterns">
@@ -183,7 +158,7 @@ export default function DossierPage() {
 
         {/* Stage intel */}
         {stage && (
-          <TacticalPanel title="Stage Intel" className="lg:col-span-3">
+          <TacticalPanel title="Stage Intel" className="lg:col-span-1">
             <div className="mb-3 flex items-center gap-2">
               <MapPin className="h-4 w-4 text-[var(--tactical-cyan)]" aria-hidden />
               <div>
@@ -196,7 +171,7 @@ export default function DossierPage() {
                 Collectible intel for this sector has not been catalogued yet (TODO).
               </p>
             )}
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
               {stage.collectibles.map((c) => {
                 const has = collected.includes(c.id);
                 const tone = COLLECTIBLE_TONE[c.type];
@@ -256,18 +231,8 @@ export default function DossierPage() {
             <WeaknessChain chain={chain} />
           </TacticalPanel>
         )}
+        </div>
       </div>
-    </div>
-  );
-}
-
-function Row({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="tac-label flex items-center gap-1.5 text-[0.6rem] text-[var(--text-muted)]">
-        <Icon className="h-3 w-3" /> {label}
-      </span>
-      <span className="text-[0.72rem] text-[var(--text-primary)]">{value}</span>
     </div>
   );
 }

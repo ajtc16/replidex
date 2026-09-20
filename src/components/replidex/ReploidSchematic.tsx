@@ -1,3 +1,4 @@
+import { XSchematic } from "./XSchematic";
 export type SchematicView = "front" | "side" | "rear";
 
 /**
@@ -6,7 +7,8 @@ export type SchematicView = "front" | "side" | "rear";
  * figure laid out so BlueprintModule positions (normalized %) line up with the
  * head (~14%), core (~40%), arms (~44%) and legs (~80%).
  */
-export function ReploidSchematic({ view }: { view: SchematicView }) {
+export function ReploidSchematic({ view, entityId }: { view: SchematicView; entityId?: string }) {
+  if (entityId === "x") return <XSchematic view={view} />;
   const stroke = "var(--tactical-cyan)";
   const faint = "color-mix(in srgb, var(--tactical-cyan) 35%, transparent)";
   const common = {

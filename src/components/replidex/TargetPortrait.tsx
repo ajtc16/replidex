@@ -16,10 +16,13 @@ const SIZES = {
   xl: "h-40 w-40 text-8xl",
 };
 
-/**
- * Portrait frame. For MVP the "portrait" is an emoji glyph over a tactical
- * blueprint-grid tile tinted by element (no copyrighted sprite dependency).
- */
+// Atlas positions are explicit, so existing data and every portrait consumer stay aligned.
+const PORTRAITS: Record<string, number> = {
+  "🔵": 8, "🔴": 9, "🧬": 10, "🛰": 11,
+  "chill-penguin": 0, "spark-mandrill": 1, "armored-armadillo": 2, "launch-octopus": 3,
+  "boomer-kuwanger": 4, "sting-chameleon": 5, "storm-eagle": 6, "flame-mammoth": 7,
+  x: 8, zero: 9, "dr-cain": 10, alia: 11,
+};
 export function TargetPortrait({
   glyph,
   element,
@@ -27,6 +30,7 @@ export function TargetPortrait({
   className,
 }: TargetPortraitProps) {
   const meta = elementMeta(element);
+  const index = PORTRAITS[glyph];
   return (
     <div
       className={cn(
@@ -49,9 +53,13 @@ export function TargetPortrait({
         }}
         aria-hidden
       />
-      <span className="relative drop-shadow" aria-hidden>
-        {glyph}
-      </span>
+      {index !== undefined ? (
+        <span className="absolute inset-0" aria-hidden style={{
+          backgroundImage: 'url("/art/x1-portraits.png")',
+          backgroundSize: "400% 300%",
+          backgroundPosition: `${(index % 4) * 100 / 3}% ${Math.floor(index / 4) * 50}%`,
+        }} />
+      ) : <span className="relative drop-shadow" aria-hidden>{glyph}</span>}
       {/* corner ticks */}
       <span
         className="pointer-events-none absolute right-1 top-1 h-1.5 w-1.5 border-r border-t"

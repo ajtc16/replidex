@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Activity, ShieldAlert, Radio, ChevronRight } from "lucide-react";
 import { HudHeader } from "@/components/replidex/HudHeader";
 import { TacticalPanel } from "@/components/replidex/TacticalPanel";
-import { TacticalGlobe } from "@/components/replidex/TacticalGlobe";
+import { TacticalMap } from "@/components/replidex/TacticalMap";
 import { StatusBadge } from "@/components/replidex/StatusBadge";
 import { ProgressMeter } from "@/components/replidex/ProgressMeter";
 import { MissionCard } from "@/components/replidex/MissionCard";
@@ -17,14 +17,6 @@ import { useProgressStore } from "@/stores/progress.store";
 import { useGameStore } from "@/stores/game.store";
 import { computeCompletion } from "@/services/progress";
 import { getNextRecommendedTarget } from "@/services/recommendations";
-
-const GLOBE_MARKERS = [
-  { cx: 70, cy: 78, tone: "var(--danger)" },
-  { cx: 128, cy: 96, tone: "var(--tactical-amber)" },
-  { cx: 96, cy: 130, tone: "var(--danger)" },
-  { cx: 140, cy: 68, tone: "var(--tactical-cyan)" },
-  { cx: 84, cy: 108, tone: "var(--tactical-amber)" },
-];
 
 export default function CommandPage() {
   const progress = useProgressStore();
@@ -110,8 +102,8 @@ export default function CommandPage() {
           scanlines
           action={<StatusBadge label="Live" tone="cyan" pulse />}
         >
-          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
-            <TacticalGlobe markers={hydrated ? GLOBE_MARKERS.slice(0, Math.max(1, activeSignals - 2)) : GLOBE_MARKERS} />
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+            <TacticalMap />
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-1">
               <Stat icon={Radio} label="Active Signals" value={hydrated && gameHydrated ? activeSignals : mavericks.length} tone="var(--danger)" />
               <Stat icon={Activity} label="Hunters Online" value={3} tone="var(--tactical-cyan)" />

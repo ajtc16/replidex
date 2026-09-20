@@ -8,6 +8,7 @@ import { BlueprintCallout } from "./BlueprintCallout";
 import { cn } from "@/lib/cn";
 
 interface BlueprintViewerProps {
+  entityId: string;
   views: SchematicView[];
   modules: BlueprintModule[]; // already filtered to the active category
   selectedId?: string;
@@ -22,6 +23,7 @@ const VIEW_LABEL: Record<SchematicView, string> = {
 };
 
 export function BlueprintViewer({
+  entityId,
   views,
   modules,
   selectedId,
@@ -54,7 +56,7 @@ export function BlueprintViewer({
               onClick={() => setView(v)}
               aria-pressed={activeView === v}
               className={cn(
-                "tac-label border px-2 py-0.5 text-[0.52rem] transition-colors",
+                "tac-label border min-h-11 px-3 py-1 text-[0.65rem] transition-colors",
                 activeView === v
                   ? "border-[var(--tactical-cyan)] bg-[color-mix(in_srgb,var(--tactical-cyan)_18%,transparent)] text-[var(--tactical-cyan)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--tactical-cyan)]",
@@ -90,11 +92,11 @@ export function BlueprintViewer({
             className="relative h-full w-full transition-transform duration-300"
             style={{ transform: `scale(${zoom})` }}
           >
-            <ReploidSchematic view={activeView} />
+            <ReploidSchematic view={activeView} entityId={entityId} />
             {modules.map((m) => (
               <BlueprintCallout
                 key={m.id}
-                module={m}
+                module={entityId === "x" && activeView !== "front" && m.position ? { ...m, position: { ...m.position, x: activeView === "rear" ? 100 - m.position.x : m.id === "x-arm" ? 50 : m.position.x } } : m}
                 active={selectedId === m.id}
                 onSelect={onSelect}
               />
@@ -133,7 +135,7 @@ function ZoomBtn({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="grid h-7 w-7 place-items-center border border-[color-mix(in_srgb,var(--tactical-cyan)_40%,transparent)] bg-[color-mix(in_srgb,#071019_70%,transparent)] text-[var(--tactical-cyan)] backdrop-blur hover:bg-[color-mix(in_srgb,var(--tactical-cyan)_18%,transparent)]"
+      className="grid h-11 w-11 place-items-center border border-[color-mix(in_srgb,var(--tactical-cyan)_40%,transparent)] bg-[color-mix(in_srgb,#071019_70%,transparent)] text-[var(--tactical-cyan)] backdrop-blur hover:bg-[color-mix(in_srgb,var(--tactical-cyan)_18%,transparent)]"
     >
       {children}
     </button>

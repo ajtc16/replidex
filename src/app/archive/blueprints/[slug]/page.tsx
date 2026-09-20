@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/replidex/StatusBadge";
 import type { BlueprintModule } from "@/domain/types";
 import type { SchematicView } from "@/components/replidex/ReploidSchematic";
 import { x1BlueprintsBySlug } from "@/data/x1";
+import { onTabListKeyDown, rovingTabIndex } from "@/lib/tablist";
 import { cn } from "@/lib/cn";
 
 type Category = BlueprintModule["category"];
@@ -50,7 +51,7 @@ export default function BlueprintDetailPage() {
     <div className="pb-24 lg:pb-0">
       <HudHeader
         title={blueprint.name}
-        subtitle={`${blueprint.modelNumber ?? "MODEL TODO"} · ${blueprint.role ?? blueprint.entityType}`}
+        subtitle={`${blueprint.modelNumber ?? "Model unverified"} · ${blueprint.role ?? blueprint.entityType}`}
         action={
           <Link
             href="/archive/blueprints"
@@ -78,7 +79,7 @@ export default function BlueprintDetailPage() {
         </div>
 
         {/* Category tabs */}
-        <div role="tablist" aria-label="Blueprint systems" className="flex border border-[var(--border)] bg-[var(--surface-inset)] p-1">
+        <div role="tablist" aria-label="Blueprint systems" onKeyDown={onTabListKeyDown} className="flex border border-[var(--border)] bg-[var(--surface-inset)] p-1">
           {TABS.map((t) => {
             const has = availableCategories.has(t.id);
             return (
@@ -86,6 +87,7 @@ export default function BlueprintDetailPage() {
                 key={t.id}
                 role="tab"
                 aria-selected={tab === t.id}
+                tabIndex={rovingTabIndex(tab === t.id)}
                 disabled={!has}
                 onClick={() => has && changeTab(t.id)}
                 className={cn(
@@ -107,6 +109,7 @@ export default function BlueprintDetailPage() {
           {/* Viewer */}
           <div className="space-y-2">
             <BlueprintViewer
+              entityId={blueprint.slug}
               views={views}
               modules={tabModules}
               selectedId={selectedId}
@@ -134,16 +137,11 @@ export default function BlueprintDetailPage() {
           {/* Module list — mobile (below viewer) */}
           <div className="lg:hidden">
             <ModuleList modules={tabModules} selectedId={selectedId} onSelect={handleSelect} />
+            {selected && <BlueprintInspector module={selected} onClose={() => setSelectedId(undefined)} className="mt-3" />}
           </div>
         </div>
       </div>
 
-      {/* Inspector — mobile bottom sheet */}
-      {selected && (
-        <div className="fixed inset-x-0 bottom-16 z-30 p-3 lg:hidden" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}>
-          <BlueprintInspector module={selected} onClose={() => setSelectedId(undefined)} className="shadow-2xl" />
-        </div>
-      )}
     </div>
   );
 }

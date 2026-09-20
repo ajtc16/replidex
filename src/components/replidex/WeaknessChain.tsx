@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import type { WeaknessChainView } from "@/services/weaknessGraph";
+import { WeaponArtwork } from "./WeaponArtwork";
 import { TargetPortrait } from "./TargetPortrait";
 import { elementMeta } from "@/lib/elements";
 import { cn } from "@/lib/cn";
@@ -50,7 +51,7 @@ function Node({
   );
 }
 
-function WeaponLink({ name, element }: { name: string; element?: import("@/domain/types").ElementType }) {
+function WeaponLink({ id, name, element }: { id: string; name: string; element?: import("@/domain/types").ElementType }) {
   const meta = elementMeta(element);
   return (
     <div className="flex flex-col items-center">
@@ -58,7 +59,7 @@ function WeaponLink({ name, element }: { name: string; element?: import("@/domai
         className="grid h-8 w-8 place-items-center border text-sm"
         style={{ borderColor: meta.color, color: meta.color, background: `color-mix(in srgb, ${meta.color} 10%, transparent)` }}
       >
-        {meta.glyph}
+        <WeaponArtwork id={id} className="h-6 w-6" />
       </span>
       <span className="mt-1 max-w-[6rem] text-center text-[0.58rem] leading-tight text-[var(--text-muted)]">
         {name}
@@ -91,7 +92,7 @@ export function WeaknessChain({ chain, className }: WeaknessChainProps) {
             href={`/targets/${incoming.maverick.slug}`}
           />
           <Arrow />
-          <WeaponLink name={incoming.weapon.name} element={incoming.weapon.element} />
+          <WeaponLink id={incoming.weapon.id} name={incoming.weapon.name} element={incoming.weapon.element} />
           <Arrow />
         </>
       )}
@@ -106,7 +107,7 @@ export function WeaknessChain({ chain, className }: WeaknessChainProps) {
       {outgoing && (
         <>
           <Arrow />
-          <WeaponLink name={outgoing.weapon.name} element={outgoing.weapon.element} />
+          <WeaponLink id={outgoing.weapon.id} name={outgoing.weapon.name} element={outgoing.weapon.element} />
           <Arrow />
           <Node
             glyph={outgoing.maverick.portrait}
