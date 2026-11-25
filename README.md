@@ -6,6 +6,29 @@
 
 Covers the **entire mainline series, Mega Man X1–X8** — 64 Mavericks with verified weakness chains, weapon rewards, and per-game routes. X1 is hand-authored in depth; X2–X8 are built from verified seed data.
 
+## Screenshots
+
+### Command Center
+
+![Replidex Command Center](docs/screenshots/command.jpg)
+
+| Target Database | Target Dossier |
+| --- | --- |
+| ![Target Database](docs/screenshots/targets.jpg) | ![Chill Penguin target dossier](docs/screenshots/target-dossier.jpg) |
+
+| Hunter Route | Blueprint Archive |
+| --- | --- |
+| ![Hunter Route](docs/screenshots/hunter-route.jpg) | ![Reploid Blueprint Archive](docs/screenshots/blueprint-archive.jpg) |
+
+<details>
+<summary>Mobile view</summary>
+
+<p align="center">
+  <img src="docs/screenshots/command-mobile.jpg" alt="Replidex Command Center on mobile" width="390" />
+</p>
+
+</details>
+
 ## Stack
 
 - **Next.js 16** (App Router) · **React 19** · **TypeScript** (strict)
